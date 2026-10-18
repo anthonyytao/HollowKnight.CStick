@@ -1,0 +1,61 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <RootNamespace>CStick</RootNamespace>
+    <AssemblyName>CStick</AssemblyName>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <HollowKnightManaged Condition="'$(HollowKnightManaged)' == ''">/home/deck/.local/share/Steam/steamapps/common/Hollow Knight/hollow_knight_Data/Managed</HollowKnightManaged>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CStick.Core\CStick.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(HollowKnightManaged)/Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(HollowKnightManaged)/UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <!-- BepInEx.BaseUnityPlugin was compiled against the UnityEngine assembly name. The game type-forwards that to CoreModule. -->
+    <Reference Include="UnityEngine">
+      <HintPath>$(HollowKnightManaged)/UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Core" Version="5.4.21">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>compile</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <Target Name="RemoveExternalAssemblies" AfterTargets="Build">
+    <ItemGroup>
+      <ExternalOutput Include="$(OutputPath)BepInEx*.dll" />
+      <ExternalOutput Include="$(OutputPath)BepInEx*.pdb" />
+      <ExternalOutput Include="$(OutputPath)0Harmony*.dll" />
+      <ExternalOutput Include="$(OutputPath)0Harmony*.pdb" />
+      <ExternalOutput Include="$(OutputPath)Harmony*.dll" />
+      <ExternalOutput Include="$(OutputPath)MonoMod*.dll" />
+      <ExternalOutput Include="$(OutputPath)MonoMod*.pdb" />
+      <ExternalOutput Include="$(OutputPath)SemanticVersioning*.dll" />
+      <ExternalOutput Include="$(OutputPath)Assembly-CSharp*.dll" />
+      <ExternalOutput Include="$(OutputPath)UnityEngine*.dll" />
+      <ExternalOutput Include="$(OutputPath)System.*.dll" />
+    </ItemGroup>
+    <Delete Files="@(ExternalOutput)" />
+  </Target>
+</Project>
