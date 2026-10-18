@@ -16,6 +16,11 @@ namespace CStick
         internal static bool ProtectReverse;
         internal static bool SuppressCancelOnce;
         internal static FlickDirection PreviousFlick;
+        internal static FlickDirection QueuedFlick;
+        internal static int QueuedSteps;
+
+        // HeroController.ATTACK_QUEUE_STEPS. FixedUpdate increments it, so five steps is about a tenth of a second.
+        internal const int FlickQueueSteps = 5;
 
         private void Awake()
         {
@@ -25,6 +30,26 @@ namespace CStick
         }
 
         internal static bool InGameplay(HeroController hero)
+        {
+            return PlaySessionOpen(hero) && hero.hero_state != ActorStates.no_input;
+        }
+
+        internal static bool CanTrackStick(HeroController hero)
+        {
+            if (!PlaySessionOpen(hero))
+            {
+                return false;
+            }
+
+            if (hero.hero_state != ActorStates.no_input)
+            {
+                return true;
+            }
+
+            return hero.cState != null && (hero.cState.recoiling || hero.cState.recoilFrozen);
+        }
+
+        static bool PlaySessionOpen(HeroController hero)
         {
             if (hero == null)
             {
@@ -37,22 +62,12 @@ namespace CStick
                 return false;
             }
 
-            if (manager.gameState != GameState.PLAYING || manager.isPaused)
+            if (manager.gameState != GameState.PLAYING || manager.isPaused || !manager.IsGameplayScene())
             {
                 return false;
             }
 
             if (!hero.acceptingInput || hero.controlReqlinquished)
-            {
-                return false;
-            }
-
-            if (hero.hero_state == ActorStates.no_input)
-            {
-                return false;
-            }
-
-            if (!manager.IsGameplayScene())
             {
                 return false;
             }

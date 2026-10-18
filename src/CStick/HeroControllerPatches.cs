@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Reflection;
+using GlobalEnums;
 using HarmonyLib;
 using InControl;
 
@@ -98,12 +99,71 @@ namespace CStick
         static void Postfix(HeroController __instance)
         {
             FlickDirection current = ReadRightStick();
-            if (CStickPlugin.InGameplay(__instance) && StickFlick.IsNewFlick(CStickPlugin.PreviousFlick, current))
+            bool edge = StickFlick.IsNewFlick(CStickPlugin.PreviousFlick, current);
+            if (!CStickPlugin.CanTrackStick(__instance) || current == FlickDirection.None || (CStickPlugin.QueuedFlick != FlickDirection.None && current != CStickPlugin.QueuedFlick))
+            {
+                ClearQueue();
+            }
+            else if (edge && CanBuffer(__instance))
+            {
+                CStickPlugin.QueuedFlick = current;
+                CStickPlugin.QueuedSteps = 0;
+            }
+            else if (edge && CStickPlugin.InGameplay(__instance))
             {
                 TrySwing(__instance, current);
             }
 
+            if (CStickPlugin.QueuedFlick != FlickDirection.None)
+            {
+                if (CStickPlugin.QueuedSteps > CStickPlugin.FlickQueueSteps)
+                {
+                    ClearQueue();
+                }
+                else if (TrySwing(__instance, CStickPlugin.QueuedFlick))
+                {
+                    ClearQueue();
+                }
+            }
+
             CStickPlugin.PreviousFlick = current;
+        }
+
+        static void ClearQueue()
+        {
+            CStickPlugin.QueuedFlick = FlickDirection.None;
+            CStickPlugin.QueuedSteps = 0;
+        }
+
+        static bool StickBlocked(HeroController hero)
+        {
+            if (hero.cState == null)
+            {
+                return true;
+            }
+
+            InputHandler handler = InputHandler.Instance;
+            if (handler == null || handler.inputActions == null)
+            {
+                return true;
+            }
+
+            return hero.cState.wallSliding || hero.cState.nailCharging || handler.inputActions.attack.IsPressed;
+        }
+
+        static bool CanBuffer(HeroController hero)
+        {
+            if (StickBlocked(hero))
+            {
+                return false;
+            }
+
+            if (hero.cState.dashing || hero.cState.recoiling || hero.cState.recoilFrozen)
+            {
+                return true;
+            }
+
+            return hero.hero_state == ActorStates.hard_landing || hero.hero_state == ActorStates.dash_landing;
         }
 
         static FlickDirection ReadRightStick()
@@ -121,27 +181,16 @@ namespace CStick
                 device.GetControl(InputControlType.RightStickRight).Value);
         }
 
-        static void TrySwing(HeroController hero, FlickDirection direction)
+        static bool TrySwing(HeroController hero, FlickDirection direction)
         {
-            if (hero.cState == null)
+            if (direction == FlickDirection.None || StickBlocked(hero))
             {
-                return;
-            }
-
-            InputHandler handler = InputHandler.Instance;
-            if (handler == null || handler.inputActions == null)
-            {
-                return;
-            }
-
-            if (hero.cState.wallSliding || hero.cState.nailCharging || handler.inputActions.attack.IsPressed)
-            {
-                return;
+                return false;
             }
 
             if (!HeroAttack.CanAttack(hero))
             {
-                return;
+                return false;
             }
 
             float previousVertical = hero.vertical_input;
@@ -174,6 +223,20 @@ namespace CStick
             finally
             {
                 hero.vertical_input = previousVertical;
+            }
+
+            return true;
+        }
+    }
+
+    [HarmonyPatch(typeof(HeroController), "FixedUpdate")]
+    static class FixedUpdatePatch
+    {
+        static void Prefix()
+        {
+            if (CStickPlugin.QueuedFlick != FlickDirection.None)
+            {
+                CStickPlugin.QueuedSteps++;
             }
         }
     }

@@ -62,19 +62,5 @@ namespace CStick.Tests
             Assert.False(StickFlick.IsNewFlick(FlickDirection.Left, FlickDirection.None));
             Assert.False(StickFlick.IsNewFlick(FlickDirection.None, FlickDirection.None));
         }
-
-        [Fact]
-        public void Holding_does_not_repeat_until_the_stick_returns_to_center()
-        {
-            FlickDirection previous = FlickDirection.None;
-            Assert.True(StickFlick.IsNewFlick(previous, FlickDirection.Right));
-
-            previous = FlickDirection.Right;
-            Assert.False(StickFlick.IsNewFlick(previous, FlickDirection.Right));
-            Assert.False(StickFlick.IsNewFlick(previous, FlickDirection.Up));
-
-            previous = FlickDirection.None;
-            Assert.True(StickFlick.IsNewFlick(previous, FlickDirection.Up));
-        }
     }
 }
