@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Reflection;
 using HarmonyLib;
 using InControl;
 
@@ -181,13 +183,69 @@ namespace CStick
     {
         static bool Prefix(HeroController __instance)
         {
-            if (CStickPlugin.ProtectReverse && __instance.cState != null && __instance.cState.attacking)
+            if (!CStickPlugin.ProtectReverse || __instance.cState == null || !__instance.cState.attacking)
+            {
+                return true;
+            }
+
+            // FixedUpdate turns the knight back toward move_input with FlipSprite()
+            // then CancelAttack(). That pair is the only flip that should swallow a
+            // cancel. Wall slides also call FlipSprite from FixedUpdate, then
+            // CancelWallsliding(), and Update does the same. Arming the guard there
+            // would drop the next real cancel, including a hit.
+            if (!__instance.cState.wallSliding && !__instance.wallLocked && CalledFromFixedUpdate("FlipSprite"))
             {
                 CStickPlugin.SuppressCancelOnce = true;
+            }
+
+            return false;
+        }
+
+        internal static bool CalledFromFixedUpdate(string patchedMethod)
+        {
+            StackFrame[] frames = new StackTrace(false).GetFrames();
+            if (frames == null)
+            {
                 return false;
             }
 
-            return true;
+            bool skippedPatch = false;
+            for (int i = 0; i < frames.Length; i++)
+            {
+                MethodBase method = frames[i].GetMethod();
+                if (method == null)
+                {
+                    continue;
+                }
+
+                System.Type type = method.DeclaringType;
+                if (type == null)
+                {
+                    continue;
+                }
+
+                string space = type.Namespace ?? "";
+                if (space == "CStick" || space.StartsWith("HarmonyLib") || space.StartsWith("MonoMod") || type.Name.Contains("Harmony"))
+                {
+                    continue;
+                }
+
+                if (type != typeof(HeroController))
+                {
+                    return false;
+                }
+
+                string name = method.Name;
+                if (!skippedPatch && (name == patchedMethod || name.StartsWith(patchedMethod + "_")))
+                {
+                    skippedPatch = true;
+                    continue;
+                }
+
+                return name == "FixedUpdate";
+            }
+
+            return false;
         }
     }
 

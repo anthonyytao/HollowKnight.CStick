@@ -16,7 +16,16 @@ Copy `deck-look.vdf` onto the Hollow Knight Deck slot (app id 367520):
 
 `~/.local/share/Steam/steamapps/common/Steam Controller Configs/<SteamID>/config/367520/controller_neptune.vdf`
 
-In `config/configset_controller_neptune.vdf`, point `367520` at that file instead of the stock gamepad template:
+In `config/configset_controller_neptune.vdf`, Hollow Knight starts out on the stock template:
+
+```
+"367520"
+{
+	"template"		"controller_neptune_gamepad_joystick.vdf"
+}
+```
+
+Replace that whole block so Steam loads the copied file. A personal layout is marked `autosave`:
 
 ```
 "367520"
@@ -25,4 +34,4 @@ In `config/configset_controller_neptune.vdf`, point `367520` at that file instea
 }
 ```
 
-Start Steam. You can also copy `deck-look.vdf` into `~/.local/share/Steam/controller_base/templates/` and choose the template named "C-Stick look on grips".
+Leave the `template` line out of the `367520` block. Start Steam. You can also copy `deck-look.vdf` into `~/.local/share/Steam/controller_base/templates/` and choose the template named "C-Stick look on grips".
