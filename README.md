@@ -1,6 +1,6 @@
 # Hollow Knight C-Stick
 
-Right-stick nail attacks for Hollow Knight 1.5.12620, in the style of a Smash Bros C-stick. Look up and down moves to the D-pad, so an Xbox controller can still peek. On a Steam Deck, L4 and R4 can send that same D-pad input.
+Right-stick nail attacks for Hollow Knight 1.5.12620, in the style of a Smash Bros C-stick. Look up and down moves to the D-pad, so an Xbox controller can still peek.
 
 Hollow Knight on Steam is the Windows build (app 367520). The released Hollow Knight Modding API still targets 1.5.78, so this mod loads with BepInEx 5 instead of Scarab.
 
@@ -15,7 +15,6 @@ During play:
 | Left stick | Move, and aim slashes, spells, and the Crystal Heart. |
 | D-pad up / down | Instant look up / down. |
 | D-pad left / right | Move, same as before. |
-| L4 / R4 on a Steam Deck | Same look as D-pad up / down, after the layout in `steam/README.md`. |
 
 A diagonal flick prefers up or down. A left or right flick swings that way and the Knight keeps running. Up-slash and down-slash do not use the left stick.
 
@@ -28,7 +27,6 @@ Look still only happens when the Knight is standing still. Hollow Knight does no
 1. Install [BepInEx 5](https://github.com/BepInEx/BepInEx/releases), Windows x64, into the Hollow Knight folder (the folder that contains `hollow_knight.exe`). On a Steam Deck that folder is `~/.local/share/Steam/steamapps/common/Hollow Knight`. Use the Windows build, because the game runs under Proton.
 2. Start the game once so BepInEx creates its folders, then quit.
 3. Build this repo (see below) and copy `CStick.dll` and `CStick.Core.dll` into `BepInEx/plugins/`.
-4. On a Steam Deck, apply the grip layout. An Xbox controller does not need a layout change. Steps are in [steam/README.md](steam/README.md).
 
 Removing those two dlls turns the feature off. BepInEx stays until you delete it or verify the game files. The mod does not change save data.
 
