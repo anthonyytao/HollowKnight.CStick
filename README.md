@@ -10,7 +10,7 @@ During play:
 
 | Input | Result |
 |---|---|
-| Right stick | One slash in that direction. Return it to center before the next one. Holding it does not charge a Nail Art. |
+| Right stick | One slash in that direction. A second flick during that swing comes out on the first frame the nail is free. Then return the stick below halfway before the next one. Holding it does not charge a Nail Art. |
 | Attack (X) | Unchanged. A tap swings. Holding it still charges a Nail Art. |
 | Left stick | Move, and aim slashes, spells, and the Crystal Heart. |
 | D-pad up / down | Instant look up / down. |
@@ -46,8 +46,8 @@ Release output is `src/CStick/bin/Release/net472/`. Copy `CStick.dll` and `CStic
 ## Limits
 
 - Made for Hollow Knight 1.5.12620. A later patch can rename a private method and the swing will stop until the mod is updated.
-- A flick during an attack cooldown is ignored. Return the stick to center and flick again when the nail is ready.
-- A flick during a dash, a hard landing, or a hit is remembered for about a tenth of a second, the same window as the attack button. If the stick is still held out when the nail is free, it swings once. An earlier flick waits until the stick returns to center.
+- A flick while the nail is cooling down swings once on the first frame the nail is free, if the stick is still held that way. Holding it there does not swing again. The next one needs the stick back below half deflection.
+- A flick during a dash, a hard landing, or a hit is remembered for about a tenth of a second, the same window as the attack button. If the stick is still held out when that window is still open and the nail is free, it swings once. A flick from the start of the dash does not.
 - No swing from the right stick while wall-sliding, while holding the attack button, or while a Nail Art is charging.
 - D-pad up and down no longer aim slashes, spells, or the Crystal Heart. The left stick still does.
 - Holding the left stick up or down while standing still still uses the game's slow look.

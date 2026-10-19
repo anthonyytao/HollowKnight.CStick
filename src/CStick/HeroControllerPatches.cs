@@ -98,41 +98,21 @@ namespace CStick
     {
         static void Postfix(HeroController __instance)
         {
-            FlickDirection current = ReadRightStick();
-            bool edge = StickFlick.IsNewFlick(CStickPlugin.PreviousFlick, current);
-            if (!CStickPlugin.CanTrackStick(__instance) || current == FlickDirection.None || (CStickPlugin.QueuedFlick != FlickDirection.None && current != CStickPlugin.QueuedFlick))
+            bool tracking = CStickPlugin.CanTrackStick(__instance);
+            bool blocked = StickBlocked(__instance);
+            FlickDirection swing = FlickMemory.Advance(
+                ref CStickPlugin.Flicks,
+                ReadRightStick(),
+                tracking,
+                CStickPlugin.InGameplay(__instance),
+                tracking && CanBuffer(__instance),
+                blocked,
+                tracking && HeroAttack.NailCooling(__instance),
+                tracking && !blocked && HeroAttack.CanAttack(__instance));
+            if (swing != FlickDirection.None)
             {
-                ClearQueue();
+                TrySwing(__instance, swing);
             }
-            else if (edge && CanBuffer(__instance))
-            {
-                CStickPlugin.QueuedFlick = current;
-                CStickPlugin.QueuedSteps = 0;
-            }
-            else if (edge && CStickPlugin.InGameplay(__instance))
-            {
-                TrySwing(__instance, current);
-            }
-
-            if (CStickPlugin.QueuedFlick != FlickDirection.None)
-            {
-                if (CStickPlugin.QueuedSteps > CStickPlugin.FlickQueueSteps)
-                {
-                    ClearQueue();
-                }
-                else if (TrySwing(__instance, CStickPlugin.QueuedFlick))
-                {
-                    ClearQueue();
-                }
-            }
-
-            CStickPlugin.PreviousFlick = current;
-        }
-
-        static void ClearQueue()
-        {
-            CStickPlugin.QueuedFlick = FlickDirection.None;
-            CStickPlugin.QueuedSteps = 0;
         }
 
         static bool StickBlocked(HeroController hero)
@@ -234,10 +214,7 @@ namespace CStick
     {
         static void Prefix()
         {
-            if (CStickPlugin.QueuedFlick != FlickDirection.None)
-            {
-                CStickPlugin.QueuedSteps++;
-            }
+            FlickMemory.NoteFixedStep(ref CStickPlugin.Flicks);
         }
     }
 

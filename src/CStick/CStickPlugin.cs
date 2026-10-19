@@ -15,12 +15,7 @@ namespace CStick
 
         internal static bool ProtectReverse;
         internal static bool SuppressCancelOnce;
-        internal static FlickDirection PreviousFlick;
-        internal static FlickDirection QueuedFlick;
-        internal static int QueuedSteps;
-
-        // HeroController.ATTACK_QUEUE_STEPS. FixedUpdate increments it, so five steps is about a tenth of a second.
-        internal const int FlickQueueSteps = 5;
+        internal static FlickMemory Flicks;
 
         private void Awake()
         {
